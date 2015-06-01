@@ -2,6 +2,7 @@ import sys
 import argparse
 import logging
 import subprocess
+import signal
 import shlex
 import re
 from subprocess import Popen, PIPE
@@ -27,6 +28,7 @@ def init():
                             level=logging.DEBUG)
     return args
 
+children = []
 
 def c(str, *args, **kwargs):
     jobs = Queue()
@@ -55,9 +57,11 @@ def c(str, *args, **kwargs):
                          close_fds=True,
                          cwd=kwargs.get('cwd'))
 
+    children.append(p)
     outres = pipe_watch(p.stdout, "OUT", logging.info)
     errres = pipe_watch(p.stderr, "ERROR", logging.warning)
     rescode = p.wait()
+    children.remove(p)
     jobs.join()
     logging.debug(rescode, extra={'out':'RETURN'})
     if not rescode == 0 and kwargs.get('exit') is None:
@@ -69,6 +73,18 @@ def c(str, *args, **kwargs):
         logging.error("%s exited with code: %d", cl, rescode, extra={'out':'FAULT'})
         sys.exit(rescode)
     return outres
+
+
+def kill_children(signum, frame):
+    for p in children:
+        try:
+            p.terminate();
+            logging.debug("Killing {}".format(p.pid), extra={'out':'KILL'});
+        except:
+            pass
+    sys.exit(signum)
+
+signal.signal(signal.SIGINT, kill_children)
 
 def exists(regex, lines):
     reg = re.compile(regex)
