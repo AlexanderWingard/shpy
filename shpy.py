@@ -132,3 +132,16 @@ def exists(regex, lines):
         if reg.match(line):
             return True
     return False
+
+def grep(regex, lines, o=None):
+    reg = re.compile(regex)
+    result = []
+    for line in lines:
+        match = reg.match(line)
+        if match:
+            if o:
+                result.append(match.groups())
+            else:
+                result.append(line)
+    return result
+
