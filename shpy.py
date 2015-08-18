@@ -75,12 +75,16 @@ def c(str, *args, **kwargs):
     p = subprocess.Popen(shlex.split(cl),
                          stdout = subprocess.PIPE,
                          stderr = subprocess.PIPE,
+                         stdin = subprocess.PIPE,
                          close_fds=True,
                          cwd=kwargs.get('cwd'))
 
     children.append(p)
     outres = pipe_watch(p.stdout, "OUT", logging.info)
     errres = pipe_watch(p.stderr, "ERROR", logging.warning)
+    if kwargs.get('input') is not None:
+        p.stdin.write(kwargs.get('input'))
+        p.stdin.close()
     if kwargs.get('bg') is None:
         rescode = p.wait()
         children.remove(p)
