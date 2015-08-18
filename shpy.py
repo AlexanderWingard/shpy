@@ -103,6 +103,13 @@ def c(str, *args, **kwargs):
     else:
         return (outres, errres)
 
+def e(str, *args, **kwargs):
+    cl = str.format(*args)
+    logging.debug(cl, extra={'out':'EXEC'})
+    tokens = shlex.split(cl)
+    tokens2 = [tokens[0]] + tokens
+    os.execlp(*tokens2)
+
 
 def kill_children():
     for p in children:
