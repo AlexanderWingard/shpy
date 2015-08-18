@@ -50,6 +50,8 @@ def init():
     rootlogger.addHandler(streamlogger)
     rootlogger.addHandler(filelogger)
 
+    logging.debug(" ".join(sys.argv), extra={'out':'INIT'})
+
     return args
 
 children = []
