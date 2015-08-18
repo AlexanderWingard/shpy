@@ -74,7 +74,7 @@ def c(str, *args, **kwargs):
 
 
     cl = str.format(*args)
-    logging.debug(cl, extra={'out':'CALL'})
+    logging.warning(cl, extra={'out':'CALL'})
     p = subprocess.Popen(shlex.split(cl),
                          stdout = subprocess.PIPE,
                          stderr = subprocess.PIPE,
@@ -108,7 +108,7 @@ def c(str, *args, **kwargs):
 
 def e(str, *args, **kwargs):
     cl = str.format(*args)
-    logging.debug(cl, extra={'out':'EXEC'})
+    logging.warning(cl, extra={'out':'EXEC'})
     tokens = shlex.split(cl)
     tokens2 = [tokens[0]] + tokens
     os.execlp(*tokens2)
