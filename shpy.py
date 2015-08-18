@@ -23,7 +23,10 @@ def init():
 
     debugformat = logging.Formatter("%(asctime)s %(out)6s | %(message)s")
     simpleformat = logging.Formatter("%(message)s")
-    logfile = '/tmp/{}_{}.log'.format(os.path.basename(sys.argv[0]), getuser())
+    logdir = "/tmp/shpy/{}".format(getuser())
+    if not os.path.exists(logdir):
+        os.makedirs(logdir)
+    logfile = '{}/{}.log'.format(logdir, os.path.basename(sys.argv[0]))
 
     filelogger = RotatingFileHandler(logfile, backupCount=5)
     filelogger.setLevel(logging.DEBUG)
