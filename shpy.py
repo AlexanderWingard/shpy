@@ -145,3 +145,6 @@ def grep(regex, lines, o=None):
                 result.append(line)
     return result
 
+def read_file(filename):
+    with open(filename, 'r') as f:
+        return [line.rstrip() for line in f]
