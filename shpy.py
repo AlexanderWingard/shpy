@@ -1,31 +1,52 @@
+import os
 import sys
 import argparse
 import logging
+from logging.handlers import RotatingFileHandler
 import subprocess
 import signal
 import shlex
+from getpass import getuser
 import re
 from subprocess import Popen, PIPE
 from threading import Thread
 from Queue import Queue, Empty
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--verbose', '-v', action='count')
+parser.add_argument('-v', '--verbose', action='count')
 
 def init():
     args = parser.parse_args()
+
+    rootlogger = logging.getLogger()
+    rootlogger.setLevel(logging.DEBUG)
+
+    debugformat = logging.Formatter("%(asctime)s %(out)6s | %(message)s")
+    simpleformat = logging.Formatter("%(message)s")
+    logfile = '/tmp/{}_{}.log'.format(os.path.basename(sys.argv[0]), getuser())
+
+    filelogger = RotatingFileHandler(logfile, backupCount=5)
+    filelogger.setLevel(logging.DEBUG)
+    filelogger.setFormatter(debugformat)
+    filelogger.doRollover()
+
+    streamlogger = logging.StreamHandler()
     if args.verbose == 0 or args.verbose is None:
-        logging.basicConfig(format="%(message)s",
-                            level=logging.ERROR)
+        streamlogger.setFormatter(simpleformat)
+        streamlogger.setLevel(logging.ERROR)
     elif args.verbose == 1:
-        logging.basicConfig(format="%(message)s",
-                            level=logging.WARNING)
+        streamlogger.setFormatter(simpleformat)
+        streamlogger.setLevel(logging.WARNING)
     elif args.verbose == 2:
-        logging.basicConfig(format="%(message)s",
-                            level=logging.INFO)
+        streamlogger.setFormatter(simpleformat)
+        streamlogger.setLevel(logging.INFO)
     elif args.verbose > 2:
-        logging.basicConfig(format="%(asctime)s %(out)6s | %(message)s",
-                            level=logging.DEBUG)
+        streamlogger.setFormatter(debugformat)
+        streamlogger.setLevel(logging.DEBUG)
+
+    rootlogger.addHandler(streamlogger)
+    rootlogger.addHandler(filelogger)
+
     return args
 
 children = []
