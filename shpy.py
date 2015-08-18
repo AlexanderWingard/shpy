@@ -81,31 +81,39 @@ def c(str, *args, **kwargs):
     children.append(p)
     outres = pipe_watch(p.stdout, "OUT", logging.info)
     errres = pipe_watch(p.stderr, "ERROR", logging.warning)
-    rescode = p.wait()
-    children.remove(p)
-    jobs.join()
-    logging.debug(rescode, extra={'out':'RETURN'})
-    if not rescode == 0 and kwargs.get('exit') is None:
-        if logging.getLogger().getEffectiveLevel() >= logging.WARNING:
-            for line in outres:
-                logging.error("%s", line, extra={'out':'FAULTO'})
-            for line in errres:
-                logging.error("%s", line, extra={'out':'FAULTE'})
-        logging.error("%s exited with code: %d", cl, rescode, extra={'out':'FAULT'})
-        sys.exit(rescode)
-    return outres
+    if kwargs.get('bg') is None:
+        rescode = p.wait()
+        children.remove(p)
+        jobs.join()
+        logging.debug(rescode, extra={'out':'RETURN'})
+        if not rescode == 0 and kwargs.get('exit') is None:
+            if logging.getLogger().getEffectiveLevel() >= logging.WARNING:
+                for line in outres:
+                    logging.error("%s", line, extra={'out':'FAULTO'})
+                for line in errres:
+                    logging.error("%s", line, extra={'out':'FAULTE'})
+            logging.error("%s exited with code: %d", cl, rescode, extra={'out':'FAULT'})
+            sys.exit(rescode)
+    if kwargs.get('both') is None:
+        return outres
+    else:
+        return (outres, errres)
 
 
-def kill_children(signum, frame):
+def kill_children():
     for p in children:
         try:
-            p.terminate();
+            p.send_signal(signal.SIGINT);
             logging.debug("Killing {}".format(p.pid), extra={'out':'KILL'});
         except:
             pass
+
+def handle_signal(signum, frame):
+    kill_children()
     sys.exit(signum)
 
-signal.signal(signal.SIGINT, kill_children)
+signal.signal(signal.SIGINT, handle_signal)
+signal.signal(signal.SIGTERM, handle_signal)
 
 def exists(regex, lines):
     reg = re.compile(regex)
