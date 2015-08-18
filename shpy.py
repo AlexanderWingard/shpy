@@ -113,6 +113,12 @@ def e(str, *args, **kwargs):
     tokens2 = [tokens[0]] + tokens
     os.execlp(*tokens2)
 
+def p(lines, *args, **kwargs):
+    if isinstance(lines, basestring):
+        lines = str.format(lines, *args, **kwargs).splitlines()
+    for line in lines:
+        logging.log(60, line, extra={'out':'PRINT'})
+
 
 def kill_children():
     for p in children:
