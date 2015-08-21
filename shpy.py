@@ -14,6 +14,7 @@ from Queue import Queue, Empty
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-v', '--verbose', action='count')
+parser.add_argument('--no-rollover', action='store_true', help=argparse.SUPPRESS)
 
 def init():
     args = parser.parse_args()
@@ -31,7 +32,8 @@ def init():
     filelogger = RotatingFileHandler(logfile, backupCount=5)
     filelogger.setLevel(logging.DEBUG)
     filelogger.setFormatter(debugformat)
-    filelogger.doRollover()
+    if not args.no_rollover:
+        filelogger.doRollover()
 
     streamlogger = logging.StreamHandler()
     if args.verbose == 0 or args.verbose is None:
