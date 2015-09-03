@@ -24,7 +24,11 @@ def init():
 
     debugformat = logging.Formatter("%(asctime)s %(out)6s | %(message)s")
     simpleformat = logging.Formatter("%(message)s")
-    logdir = "/tmp/shpy/{}".format(getuser())
+    logroot = "/tmp/shpy"
+    logdir = "{}/{}".format(logroot, getuser())
+    if not os.path.exists(logroot):
+                os.makedirs(logdir)
+                os.chmod(logroot, 0777)
     if not os.path.exists(logdir):
         os.makedirs(logdir)
     logfile = '{}/{}.log'.format(logdir, os.path.basename(sys.argv[0]))
