@@ -85,6 +85,8 @@ def c(str, *args, **kwargs):
         t.start()
         return result
 
+    def null_logger(*args, **kwargs):
+        pass
 
     cl = str.format(*args)
     logging.warning(cl, extra={'out':'CALL'})
@@ -96,8 +98,12 @@ def c(str, *args, **kwargs):
                          cwd=kwargs.get('cwd'))
 
     children.append(p)
-    outres = pipe_watch(p.stdout, "OUT", logging.info)
-    errres = pipe_watch(p.stderr, "ERROR", logging.warning)
+    logfuns = (logging.info, logging.warning)
+    if kwargs.get('q'):
+        logging.info("Output logging disabled", extra={'out':'INFO'})
+        logfuns = (null_logger, null_logger)
+    outres = pipe_watch(p.stdout, "OUT", logfuns[0])
+    errres = pipe_watch(p.stderr, "ERROR", logfuns[1])
     if kwargs.get('input') is not None:
         p.stdin.write(kwargs.get('input'))
         p.stdin.close()
