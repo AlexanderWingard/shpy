@@ -132,6 +132,9 @@ def e(str, *args, **kwargs):
     tokens2 = [tokens[0]] + tokens
     os.execlp(*tokens2)
 
+def recursive_command():
+    return " ".join([sys.argv[0], "--no-rollover"] + sys.argv[1:])
+
 def p(lines, *args, **kwargs):
     if isinstance(lines, basestring):
         lines = str.format(lines, *args, **kwargs).splitlines()
