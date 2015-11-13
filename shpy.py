@@ -44,7 +44,7 @@ def init():
     if not args.no_rollover:
         filelogger.doRollover()
 
-    streamlogger = logging.StreamHandler()
+    streamlogger = logging.StreamHandler(sys.stdout)
     if args.verbose == 0 or args.verbose is None:
         streamlogger.setFormatter(simpleformat)
         streamlogger.setLevel(logging.ERROR)
