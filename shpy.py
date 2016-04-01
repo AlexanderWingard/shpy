@@ -8,7 +8,7 @@ import signal
 import shlex
 from getpass import getuser
 import re
-from subprocess import Popen, PIPE
+from subprocess import Popen, PIPE, CalledProcessError
 from threading import Thread
 from Queue import Queue, Empty
 
@@ -119,7 +119,7 @@ def c(str, *args, **kwargs):
                 for line in errres:
                     logging.error("%s", line, extra={'out':'FAULTE'})
             logging.error("%s exited with code: %d", cl, rescode, extra={'out':'FAULT'})
-            sys.exit(rescode)
+            raise CalledProcessError(rescode, cl, errres)
     if kwargs.get('both') is None:
         return outres
     else:
